@@ -16,11 +16,14 @@ output_layer = compiled_model.output(0)
 
 cap = cv2.VideoCapture(0)
 
-# Smoothing Variables
+# Scanner and Smoothing Variables
 smoothed_depth = None
-alpha = 0.2  # Smoothing factor (0.1 = very smooth/slow, 0.9 = fast/flickery)
+alpha = 0.2     # Smoothing factor (0.1 = very smooth/slow, 0.9 = fast/flickery)
+scan_val = 0
+direction = 2   # Laser speed
+tolerance = 5   # Laser thickness
 
-print("Press 'q' to exit.")
+print("Press 'q' to quit.")
 
 while True:
     ret, frame = cap.read()
@@ -43,15 +46,25 @@ while True:
         smoothed_depth = cv2.addWeighted(smoothed_depth, 1 - alpha, depth_map, alpha, 0)
 
     # Postprocessing
-
     depth_norm = cv2.normalize(smoothed_depth, None, 0, 255, cv2.NORM_MINMAX)
     depth_norm = np.uint8(depth_norm)
-    
     depth_resized = cv2.resize(depth_norm, (frame.shape[1], frame.shape[0]))
-    depth_color = cv2.applyColorMap(depth_resized, cv2.COLORMAP_MAGMA)
-    
+
+    # Volumetric Scan Logic
+    scan_val += direction
+    if scan_val >= 255 or scan_val <= 0:
+        direction *= -1
+
+    mask = cv2.inRange(depth_resized, scan_val - tolerance, scan_val + tolerance)
+
+    # HUD
+    display_frame = cv2.addWeighted(frame, 0.4, frame, 0, 0)
+    display_frame[mask > 0] = (0, 255, 0) 
+    cv2.putText(display_frame, f"LiDAR RANGE: {scan_val}", (20, 40), 
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
     # Display
-    cv2.imshow('Depth Map', depth_color)
+    cv2.imshow('Lidar Scanner', display_frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
