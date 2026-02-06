@@ -16,14 +16,24 @@ output_layer = compiled_model.output(0)
 
 cap = cv2.VideoCapture(0)
 
-# Scanner and Smoothing Variables
+# Variables
 smoothed_depth = None
 alpha = 0.2     # Smoothing factor (0.1 = very smooth/slow, 0.9 = fast/flickery)
-scan_val = 0
-direction = 2   # Laser speed
+scan_val = 128  # Default scan value
+direction = 4   # Laser speed
 tolerance = 5   # Laser thickness
+K_VAL = 6482.4  # Empirically derived scale
+POWER = 1.43    # Non-linear compression factor
+OFFSET = 118.6  # Sensor-specific noise floor baseline
 
-print("Press 'q' to quit.")
+# Modes
+MODES = ["SCANNING", "AUTO-LOCK", "MANUAL"]
+mode_idx = 1
+
+print("CONTROLS:")
+print(" 'q': Quit")
+print(" 'm': Cycle Modes (Scanning -> Auto-Lock -> Manual)")
+print(" 'w'/'s': Manual Laser Control")
 
 while True:
     ret, frame = cap.read()
@@ -39,34 +49,58 @@ while True:
     # Inference and Stabilization
     result = compiled_model([input_data])[output_layer]
     depth_map = result[0] 
-    
     if smoothed_depth is None:
         smoothed_depth = depth_map
     else:
         smoothed_depth = cv2.addWeighted(smoothed_depth, 1 - alpha, depth_map, alpha, 0)
 
     # Postprocessing
+    raw_val = smoothed_depth[128, 128]
+
+    denom = max(1.0, raw_val - OFFSET)
+    dist_meters = K_VAL / (denom ** POWER)
+
+    if MODES[mode_idx] == "SCANNING":
+        scan_val += direction
+        if scan_val >= 255 or scan_val <= 0:
+            direction *= -1
+    elif MODES[mode_idx] == "AUTO-LOCK":
+        val_offset = max(1, raw_val - OFFSET) 
+        scan_val = int(np.clip((val_offset * 0.5), 0, 255))
+    
     depth_norm = cv2.normalize(smoothed_depth, None, 0, 255, cv2.NORM_MINMAX)
     depth_norm = np.uint8(depth_norm)
     depth_resized = cv2.resize(depth_norm, (frame.shape[1], frame.shape[0]))
 
-    # Volumetric Scan Logic
-    scan_val += direction
-    if scan_val >= 255 or scan_val <= 0:
-        direction *= -1
-
     mask = cv2.inRange(depth_resized, scan_val - tolerance, scan_val + tolerance)
 
-    # HUD
+    # Display
     display_frame = cv2.addWeighted(frame, 0.4, frame, 0, 0)
     display_frame[mask > 0] = (0, 255, 0) 
-    cv2.putText(display_frame, f"LiDAR RANGE: {scan_val}", (20, 40), 
-                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+    
+    h, w = frame.shape[:2]
+    cv2.line(display_frame, (w//2-10, h//2), (w//2+10, h//2), (0, 255, 0), 1)
+    cv2.line(display_frame, (w//2, h//2-10), (w//2, h//2+10), (0, 255, 0), 1)
 
-    # Display
-    cv2.imshow('Lidar Scanner', display_frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    cv2.putText(display_frame, f"MODE: {MODES[mode_idx]}", (20, 40), 
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+    cv2.putText(display_frame, f"LiDAR RANGE: {scan_val}", (20, 70), 
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+    cv2.putText(display_frame, f"CENTER DISTANCE: {dist_meters:.2f}m", (20, 100), 
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+
+    cv2.imshow('LiDAR Scanner', display_frame)
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('q'):
         break
+    elif key == ord('m'):
+        mode_idx = (mode_idx + 1) % len(MODES)
+    elif key == ord('w'):
+        mode_idx = 2
+        scan_val = max(0, scan_val - 4)
+    elif key == ord('s'):
+        mode_idx = 2
+        scan_val = min(255, scan_val + 4)
 
 cap.release()
 cv2.destroyAllWindows()
