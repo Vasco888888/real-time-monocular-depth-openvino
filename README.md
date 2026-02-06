@@ -41,7 +41,7 @@ For a detailed technical analysis, including the specifics of the depth inferenc
 
 ### **Algorithms and Logic**
 *   **Exponential Moving Average (EMA):** Applied to the raw depth map to smooth out frame-to-frame noise (`alpha = 0.2`).
-*   **Non-Linear Depth Calibration:** A custom formula derived to map the unitless AI output to real-world meters:
+*   **Non-Linear Depth Calibration:** Converts the model's raw output ($x$), which represents **relative disparity (inverse depth)**, into real-world meters ($D$) using a custom-derived formula:
 
 $$ D = \frac{K}{(x - \text{offset})^{P}} $$
 
