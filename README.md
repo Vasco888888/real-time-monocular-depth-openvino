@@ -1,8 +1,8 @@
-# Real-Time Spatial Geometry Reconstruction via Monocular Inference
+# Real-Time Spatial Geometry Reconstruction via Monocular Depth Estimation
 
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python&logoColor=white)
-![OpenVINO](https://img.shields.io/badge/OpenVINO-Runtime-orange?style=for-the-badge&logo=intel&logoColor=white)
-![OpenCV](https://img.shields.io/badge/OpenCV-Computer_Vision-green?style=for-the-badge&logo=opencv&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.13%2B-blue?style=for-the-badge&logo=python&logoColor=white)
+![OpenVINO](https://img.shields.io/badge/OpenVINO-2025.4-orange?style=for-the-badge&logo=intel&logoColor=white)
+![OpenCV](https://img.shields.io/badge/OpenCV-4.13.0-green?style=for-the-badge&logo=opencv&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)
 
 A real-time depth estimation and LiDAR simulation tool built with **Python**, **OpenCV**, and **OpenVINO**. This project transforms a standard 2D webcam feed into a 3D depth map and simulates a laser scanner for distance measurement.
@@ -18,10 +18,11 @@ This project demonstrates an end-to-end pipeline for **Monocular Depth Estimatio
 
 1.  **Input:** Captures a live video feed from a standard webcam.
 2.  **Inference:** Uses the MiDaS Small model optimized with OpenVINO to predict relative depth. The model is compiled for Intel® Integrated Graphics (iGPU) to ensure real-time performance on consumer-grade hardware.
-3.  **Post-Process:** Smoothing and normalization are applied to the raw depth map to reduce flicker and enhance visual clarity.
+3.  **Post-Process:** Smoothing and normalization are applied to the raw depth map to reduce flicker. A real-time FPS counter is calculated to monitor system performance.
 4.  **Application:**
     *   **Depth Map:** A heatmap visualization of the scene's depth.
     *   **LiDAR Scanner:** A simulated laser scanner that locks onto objects and calculates their distance to the camera in meters.
+    *   **Performance Monitoring:** Real-time FPS overlay on both applications to track inference speed.
 
 ## Project Report
 For a detailed technical analysis, including the specifics of the depth inference model, calibration methodology, and performance metrics, please refer to the full report:
@@ -31,9 +32,9 @@ For a detailed technical analysis, including the specifics of the depth inferenc
 ## Tech Stack
 
 ### **Core Pipeline (AI and Computer Vision)**
-*   **OpenVINO Toolkit:** Optimizes and runs the deep learning model on the CPU/GPU for real-time performance.
+*   **OpenVINO Toolkit (2025.4):** Optimizes and runs the deep learning model on the CPU/GPU for real-time performance.
 *   **MiDaS (v2.1 Small):** A lightweight convolutional neural network (CNN) trained on multimodal datasets to estimate relative depth from a single image. Utilizes **Zero-shot cross-dataset transfer** capabilities, allowing the model to generalize to new environments without additional training.
-*   **OpenCV:** Handles video capture, image preprocessing (resizing, color conversion), and the graphical user interface (GUI).
+*   **OpenCV (4.13.0):** Handles video capture, image preprocessing (resizing, color conversion), and the graphical user interface (GUI).
 
 ### **Hardware Acceleration**
 *   **Target Hardware:** Optimized specifically for Intel® UHD Graphics.

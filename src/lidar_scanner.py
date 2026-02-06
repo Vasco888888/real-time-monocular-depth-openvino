@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import openvino as ov
 import os
+import time
 
 # Setup OpenVINO
 core = ov.Core()
@@ -25,6 +26,7 @@ tolerance = 5   # Laser thickness
 K_VAL = 6482.4  # Empirically derived scale
 POWER = 1.43    # Non-linear compression factor
 OFFSET = 118.6  # Sensor-specific noise floor baseline
+prev_time = 0
 
 # Modes
 MODES = ["SCANNING", "AUTO-LOCK", "MANUAL"]
@@ -39,6 +41,11 @@ while True:
     ret, frame = cap.read()
     if not ret:
         break
+    
+    # FPS
+    curr_time = time.time()
+    fps = 1 / (curr_time - prev_time) if prev_time != 0 else 0
+    prev_time = curr_time
     
     # Preprocessing
     img = cv2.resize(frame, (256, 256), interpolation=cv2.INTER_CUBIC)
@@ -88,6 +95,8 @@ while True:
                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
     cv2.putText(display_frame, f"CENTER DISTANCE: {dist_meters:.2f}m", (20, 100), 
                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+    cv2.putText(display_frame, f"FPS: {int(fps)}", (20, 130), 
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
     cv2.imshow('LiDAR Scanner', display_frame)
     key = cv2.waitKey(1) & 0xFF

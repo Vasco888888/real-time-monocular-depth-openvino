@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import openvino as ov
 import os
+import time
 
 # Setup OpenVINO
 core = ov.Core()
@@ -19,6 +20,7 @@ cap = cv2.VideoCapture(0)
 # Smoothing Variables
 smoothed_depth = None
 alpha = 0.2  # Smoothing factor (0.1 = very smooth/slow, 0.9 = fast/flickery)
+prev_time = 0
 
 print("Press 'q' to exit.")
 
@@ -26,6 +28,11 @@ while True:
     ret, frame = cap.read()
     if not ret:
         break
+    
+    # FPS
+    curr_time = time.time()
+    fps = 1 / (curr_time - prev_time) if prev_time != 0 else 0
+    prev_time = curr_time
     
     # Preprocessing
     img = cv2.resize(frame, (256, 256), interpolation=cv2.INTER_CUBIC)
@@ -49,6 +56,9 @@ while True:
     
     depth_resized = cv2.resize(depth_norm, (frame.shape[1], frame.shape[0]))
     depth_color = cv2.applyColorMap(depth_resized, cv2.COLORMAP_MAGMA)
+    
+    cv2.putText(depth_color, f"FPS: {int(fps)}", (20, 40), 
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
     
     # Display
     cv2.imshow('Depth Map', depth_color)
