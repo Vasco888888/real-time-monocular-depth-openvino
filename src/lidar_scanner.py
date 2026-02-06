@@ -30,7 +30,7 @@ prev_time = 0
 
 # Modes
 MODES = ["SCANNING", "AUTO-LOCK", "MANUAL"]
-mode_idx = 1
+mode_idx = 0
 
 print("CONTROLS:")
 print(" 'q': Quit")
