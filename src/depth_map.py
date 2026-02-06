@@ -55,7 +55,7 @@ while True:
     depth_norm = np.uint8(depth_norm)
     
     depth_resized = cv2.resize(depth_norm, (frame.shape[1], frame.shape[0]))
-    depth_color = cv2.applyColorMap(depth_resized, cv2.COLORMAP_MAGMA)
+    depth_color = cv2.applyColorMap(depth_resized, cv2.COLORMAP_JET)
     
     cv2.putText(depth_color, f"FPS: {int(fps)}", (20, 40), 
                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
