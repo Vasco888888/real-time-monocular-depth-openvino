@@ -66,6 +66,7 @@ while True:
 
     denom = max(1.0, raw_val - OFFSET)
     dist_meters = K_VAL / (denom ** POWER)
+    dist_meters = min(dist_meters, 20.0)
 
     if MODES[mode_idx] == "SCANNING":
         scan_val += direction
