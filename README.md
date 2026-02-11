@@ -27,7 +27,7 @@ This project demonstrates an end-to-end pipeline for **Monocular Depth Estimatio
 ## Project Report
 For a detailed technical analysis, including the specifics of the depth inference model, calibration methodology, and performance metrics, please refer to the full report:
 
-**[Project Report (PDF)](./docs/depthinference.pdf)**
+**[Project Report (PDF)](./docs/depthscannerreport.pdf)**
 
 ## Tech Stack
 
@@ -46,7 +46,7 @@ For a detailed technical analysis, including the specifics of the depth inferenc
 
 $$ D = \frac{K}{(x - \text{offset})^{P}} $$
 
-Where $K \approx 6482$, $P \approx 1.43$, and $OFFSET \approx 119$.
+Where $K \approx 6482$, $P \approx 1.43$, and $OFFSET \approx 118$.
 
 ---
 
@@ -101,7 +101,7 @@ Where $K \approx 6482$, $P \approx 1.43$, and $OFFSET \approx 119$.
 ```bash
 ├── assets/                 # Demos for README
 ├── docs/
-│   └── depthinference.pdf  # Technical report and analysis
+│   └── depthscannerreport.pdf  # Technical report and analysis
 ├── models/
 │   ├── MiDaS_small.xml     # OpenVINO Intermediate Representation (Topology)
 │   └── MiDaS_small.bin     # OpenVINO Intermediate Representation (Weights)
@@ -116,11 +116,11 @@ Where $K \approx 6482$, $P \approx 1.43$, and $OFFSET \approx 119$.
 ## Challenges and Limitations
 *   **Relative Depth:** The MiDaS model estimates relative depth, meaning it knows what is in front, but not exactly how far away it is. The metric distance is an estimation based on calibration.
 *   **Edge Noise:** The depth map often flickers at object boundaries. We mitigated this using a temporal smoothing filter (EMA).
-*   **Generalizability:** The calibration constants ($K$, $P$, $offset$) are tuned for the sensor's **Effective Operating Range** (0.5m - 3.0m). Accuracy decreases significantly outside this window or in varied lighting conditions.
+*   **Generalizability:** The calibration constants ($K$, $P$, $offset$) are tuned for the sensor's **Effective Operating Range** (0.5m - 2.5m). Accuracy decreases significantly outside this window or in varied lighting conditions.
 
 ---
 
 ## Future Work
 *   **Stereo-Vision Integration:** Implementing dual-camera support to eliminate the need for manual metric calibration ($K$).
-*   **Edge-Preserving Filters:** Replacing the current EMA filter with a **Bilateral Filter** to reduce edge noise and flicker without softening object boundaries.
+*   **Advanced Temporal Filtering:** Replacing the current EMA filter with a **Kalman Filter** to predict motion states, thereby reducing the latency (lag) observed during rapid camera movements while maintaining signal stability.
 
