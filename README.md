@@ -27,7 +27,7 @@ This project demonstrates an end-to-end pipeline for **Monocular Depth Estimatio
 ## Project Report
 For a detailed technical analysis, including the specifics of the depth inference model, calibration methodology, and performance metrics, please refer to the full report:
 
-**[Project Report (PDF)](./docs/depthscannerreport.pdf)**
+**[Project Report (PDF)](./docs/Real-Time%20Spatial%20Geometry%20Reconstruction%20via%20Monocular%20Depth%20Estimation.pdf)**
 
 ## Tech Stack
 
@@ -101,7 +101,7 @@ Where $K \approx 6482$, $P \approx 1.43$, and $OFFSET \approx 118$.
 ```bash
 ├── assets/                 # Demos for README
 ├── docs/
-│   └── depthscannerreport.pdf  # Technical report and analysis
+│   └── Real-Time Spatial Geometry Reconstruction via Monocular Depth Estimation.pdf  # Technical report and analysis
 ├── models/
 │   ├── MiDaS_small.xml     # OpenVINO Intermediate Representation (Topology)
 │   └── MiDaS_small.bin     # OpenVINO Intermediate Representation (Weights)
